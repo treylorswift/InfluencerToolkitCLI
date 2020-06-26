@@ -1,6 +1,6 @@
 # Influencer Toolkit CLI (command line interface)
 
-Influencer Toolkit automates sending of direct messages to your Twitter followers.
+Influencer Toolkit CLI is a command line tool that automates sending of direct messages to your Twitter followers. 
 
 ### Features
 
