@@ -298,10 +298,14 @@ class MessageHistory {
             this.tableName = 'TwitterDryRunMessageHistory';
         //get the most recent 1000 messages sent
         try {
+            //get the most recent 1000 messages, they'll be ordered with newest messages at the front of the array
             let initCacheCmd = this.db.prepare(`SELECT * FROM ${this.tableName} WHERE campaign_id=? ORDER BY date DESC LIMIT 1000`);
-            let result = initCacheCmd.all([this.campaign.campaign_id]);
-            for (var i = 0; i < result.length; i++) {
-                this.events.push({ campaign_id: result[i].campaign_id, recipient: result[i].id_str, time: new Date(result[i].date) });
+            let results = initCacheCmd.all([this.campaign.campaign_id]);
+            //we want our event list is to be ordered oldest (at the front of the array) to newest (at the end of the array)
+            //as messages get sent, they are .pushed onto the end. so we need to reverse the rows received from the DB
+            for (var i = 0; i < results.length; i++) {
+                let r = results[results.length - i - 1];
+                this.events.push({ campaign_id: r.campaign_id, recipient: r.id_str, time: new Date(r.date) });
             }
         }
         catch (err) {
