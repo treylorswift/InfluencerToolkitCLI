@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto = require("crypto");
+const MessageTemplate = require("./MessageTemplate");
 const TwitterUser_1 = require("./TwitterUser");
 const TwitterFollowerDB_1 = require("./TwitterFollowerDB");
 const Delay_1 = require("./Delay");
@@ -113,13 +114,23 @@ class MessagingCampaignManager {
             //loop until we're actually able to send without any response error
             while (1) {
                 try {
+                    //expand any templated variables that may be in the message - only one handled/expected is
+                    //"followerTwitterHandle"
+                    let message;
+                    try {
+                        message = MessageTemplate.Expand(this.campaign.message, recipient.screenName);
+                    }
+                    catch (err) {
+                        //expansion failed
+                        return false;
+                    }
                     if (actuallySendMessage) {
                         let params = {
                             event: {
                                 type: 'message_create',
                                 message_create: {
                                     target: { recipient_id: recipient.idStr },
-                                    message_data: { text: this.campaign.message }
+                                    message_data: { text: message }
                                 }
                             }
                         };

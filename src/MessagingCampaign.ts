@@ -1,5 +1,6 @@
 import * as crypto from 'crypto'
 import * as DB from 'better-sqlite3';
+import * as MessageTemplate from './MessageTemplate'
 
 import {FollowerCacheQuery, FollowerCacheQueryResult} from './TwitterFollowerDB'
 
@@ -188,6 +189,19 @@ export class MessagingCampaignManager
         {
             try
             {
+                //expand any templated variables that may be in the message - only one handled/expected is
+                //"followerTwitterHandle"
+                let message;
+                try
+                {
+                    message = MessageTemplate.Expand(this.campaign.message, recipient.screenName);
+                }
+                catch (err)
+                {
+                    //expansion failed
+                    return false;
+                }
+
                 if (actuallySendMessage)
                 {
                     let params = 
@@ -198,7 +212,7 @@ export class MessagingCampaignManager
                             message_create:
                             {
                                 target: { recipient_id: recipient.idStr },
-                                message_data: { text: this.campaign.message }
+                                message_data: { text: message }
                             }
                         }
                     }
